@@ -7,6 +7,7 @@
 #include <windows.h>
 
 #define ARENA_SIZE 4*1024*1024
+#define UTF8BOM "\xef\xbb\xbf"
 
 typedef struct
 {
@@ -36,7 +37,7 @@ ArenaFree(arena *Arena)
 static char *
 Win32ConvertUTF16ToUTF8(arena *Arena, LPWSTR UTF16String)
 {
-    char * Result = NULL;
+    char *Result = NULL;
     if (UTF16String)
     {
         size_t SizeRequiredIncludingNullTerminator =
@@ -85,25 +86,6 @@ Win32CheckIfConsoleOutput(HANDLE OutputHandle)
 }
 
 static void
-Win32PrintUTF8BOM(HANDLE OutputHandle)
-{
-    uint8_t UTF8BOM[3] = { 0xef, 0xbb, 0xbf };
-    DWORD BytesWrittenThisWriteCall;
-    DWORD BytesToWrite = 3;
-    DWORD BytesWritten = 0;
-    while (BytesToWrite - BytesWritten)
-    {
-        WriteFile(OutputHandle,
-                  (PVOID)UTF8BOM,
-                  BytesToWrite-BytesWritten,
-                  &BytesWrittenThisWriteCall,
-                  0);
-
-        BytesWritten += BytesWrittenThisWriteCall;
-    }
-}
-
-static void
 Win32Print(HANDLE OutputHandle, char *String)
 {
     if (String)
@@ -113,12 +95,14 @@ Win32Print(HANDLE OutputHandle, char *String)
         DWORD BytesWrittenThisWriteCall = 0;
         while (BytesToWrite - BytesWritten)
         {
-            WriteFile(
+            bool WriteSuccess = WriteFile(
                 OutputHandle,
                 (PVOID)String,
                 BytesToWrite - BytesWritten,
                 &BytesWrittenThisWriteCall,
                 0);
+
+            if (!WriteSuccess) { break; }
 
             BytesWritten += BytesWrittenThisWriteCall;
         }
@@ -151,7 +135,7 @@ main(void)
         // window. This avoids artifacts of non printable characters in
         // console windows and enables correct behaviour when redirecting
         // stdout to a file in Windows PowerShell.
-        Win32PrintUTF8BOM(StdOut);
+        Win32Print(OutputHandle, UTF8BOM);
     }
 
     for (int i = 1; i < argc; ++i)

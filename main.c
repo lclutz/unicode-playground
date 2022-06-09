@@ -114,9 +114,11 @@ main(void)
 {
     HANDLE StdOut = GetStdHandle(STD_OUTPUT_HANDLE);
 
-    // REALLY make sure we have in fact loaded the UTF-8 code page!
-    assert(SetConsoleOutputCP(CP_UTF8));
-    assert(GetConsoleOutputCP() == CP_UTF8);
+    if (!SetConsoleOutputCP(CP_UTF8))
+    {
+        Win32Print(StdOut, "[ERROR]: Failed to set UTF-8 code page\n");
+        return 1;
+    }
 
     arena Arena = {
         .Capacity = ARENA_SIZE,
@@ -135,7 +137,7 @@ main(void)
         // window. This avoids artifacts of non printable characters in
         // console windows and enables correct behaviour when redirecting
         // stdout to a file in Windows PowerShell.
-        Win32Print(OutputHandle, UTF8BOM);
+        Win32Print(StdOut, UTF8BOM);
     }
 
     for (int i = 1; i < argc; ++i)

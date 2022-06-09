@@ -1,12 +1,11 @@
 #pragma comment( lib, "kernel32.lib" )
 #pragma comment( lib, "shell32.lib" )
 
-#include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <windows.h>
 
-#define ARENA_SIZE 4*1024*1024
+#define ARENA_SIZE 1024
 #define UTF8BOM "\xef\xbb\xbf"
 
 typedef struct
@@ -126,7 +125,11 @@ main(void)
         .Buffer = malloc(ARENA_SIZE)
     };
 
-    assert(Arena.Buffer);
+    if (!Arena.Buffer)
+    {
+        Win32Print(StdOut, "[ERROR]: Failed to allocate enough memory\n");
+        return 1;
+    }
 
     int argc;
     LPWSTR *argv = CommandLineToArgvW(GetCommandLineW(), &argc);
@@ -145,6 +148,7 @@ main(void)
         char *UTF8String = Win32ConvertUTF16ToUTF8(&Arena, argv[i]);
         Win32Print(StdOut, UTF8String);
         Win32Print(StdOut, "\n");
+        ArenaFree(&Arena);
     }
 
     return 0;

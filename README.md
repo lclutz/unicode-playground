@@ -1,17 +1,12 @@
 # Unicode Playground
 
 Do the rain dance required to load the VisualStudio environment into your
-command line and build the program with:
+command line and build the program by running `build.bat`.
 
-```
-cl echo.c
-```
-
-It will echo back whatever parameters you provide, each parameter on a new
-line:
+Example usage:
 
 ```shell
-> .\echo.exe äaöoüu αβγδ ßßßß 漢字
+> .\build\echo.exe äaöoüu αβγδ ßßßß 漢字
 äaöoüu
 αβγδ
 ßßßß

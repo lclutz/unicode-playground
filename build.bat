@@ -10,7 +10,7 @@ where /q cl || (
 
 set CFLAGS=/utf-8 /FC /Zi /MT /nologo /W3
 set LDFLAGS=/opt:ref /incremental:no /subsystem:console
-set LIBS=shell32.lib
+set LIBS=shell32.lib shell32.lib
 
 
 if not exist build\ mkdir build

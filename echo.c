@@ -1,6 +1,3 @@
-#pragma comment( lib, "kernel32.lib" )
-#pragma comment( lib, "shell32.lib" )
-
 #include <stdbool.h>
 #include <stdint.h>
 

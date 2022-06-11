@@ -117,7 +117,7 @@ Win32ConvertUTF16ToUTF8(arena *Arena, LPWSTR UTF16String)
     char *Result = NULL;
     if (UTF16String)
     {
-        size_t SizeRequiredIncludingNullTerminator =
+        int SizeRequiredIncludingNullTerminator =
             WideCharToMultiByte(CP_UTF8, 0, UTF16String, -1, 0, 0, 0, 0);
 
         char *OutputBuffer = ArenaAlloc(Arena, SizeRequiredIncludingNullTerminator);

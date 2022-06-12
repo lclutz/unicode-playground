@@ -52,28 +52,6 @@ Win32Die(int ReturnCode)
     ExitProcess(ReturnCode);
 }
 
-static bool
-StringEquals(char *String1, char *String2)
-{
-    size_t Length1 = strlen(String1);
-    size_t Length2 = strlen(String2);
-
-    if (Length1 != Length2)
-    {
-        return false;
-    }
-
-    for (size_t i = 0; i < Length1; ++i)
-    {
-        if (String1[i] != String2[i])
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 static void
 Win32Print(HANDLE OutputHandle, ...)
 {
@@ -203,58 +181,6 @@ main(void)
     for (int i = 0; i < argc; ++i)
     {
         argv[i] = Win32ConvertUTF16ToUTF8(&Arena, argvUTF16LE[i]);
-    }
-
-    // Parsing flags
-    for (int i = 1; i < argc; ++i)
-    {
-        if (argv[i][0] == '-')
-        {
-            if (StringEquals(argv[i], "-out"))
-            {
-                if (++i < argc)
-                {
-                    LPWSTR                OutputFilePath             = argvUTF16LE[i];
-                    DWORD                 DesiredAccess              = GENERIC_WRITE;
-                    DWORD                 ShareMode                  = FILE_SHARE_READ;
-                    LPSECURITY_ATTRIBUTES OptionalSecurityAttributes = 0;
-                    DWORD                 CreationDisposition        = CREATE_ALWAYS;
-                    DWORD                 FlagsAndAttributes         = FILE_ATTRIBUTE_NORMAL;
-                    HANDLE                OptionalTemplateFile       = 0;
-
-                    HANDLE NewOutputHandle = CreateFileW(OutputFilePath, DesiredAccess,
-                        ShareMode, OptionalSecurityAttributes, CreationDisposition,
-                        FlagsAndAttributes, OptionalTemplateFile);
-
-                    if (NewOutputHandle != INVALID_HANDLE_VALUE)
-                    {
-                        CloseHandle(GlobalOutputHandle);
-                        GlobalOutputHandle = NewOutputHandle;
-                    }
-                    else
-                    {
-                        Print(GlobalOutputHandle, "[ERROR]: Failed to open output file '", argv[i], "'.\n");
-                        Win32Die(1);
-                    }
-                }
-                else
-                {
-                    Print(GlobalOutputHandle, "[ERROR]: No path provided for '-out'.\n");
-                    Win32Die(1);
-                }
-            }
-            else
-            {
-                Print(GlobalOutputHandle, "[ERROR]: Unrecognised flag '", argv[i], "'.\n");
-                Win32Die(1);
-            }
-        }
-    }
-
-    if (GlobalOutputHandle == INVALID_HANDLE_VALUE)
-    {
-        // Only continue if we have a handle to write to
-        Win32Die(1);
     }
 
     bool OutputtingToAConsole = Win32CheckIfConsoleOutput(GlobalOutputHandle);
